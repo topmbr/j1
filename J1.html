@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>JavaScript и jQuery</title>
+</head>
+<body>
+    <script>
+        // Задание 1
+        var userName = prompt("Введите ваше имя");
+        alert("Привет, " + userName + "!");
+
+        // Задание 2
+        const currentYear = 2024; // Замените на текущий год
+        var birthYear = prompt("Введите год рождения");
+        var age = currentYear - birthYear;
+        alert("Вам " + age + " лет");
+
+        // Задание 3
+        var sideLength = prompt("Введите длину стороны квадрата");
+        var perimeter = 4 * sideLength;
+        alert("Периметр квадрата: " + perimeter);
+
+        // Задание 4
+        var radius = prompt("Введите радиус окружности");
+        var circleArea = Math.PI * Math.pow(radius, 2);
+        alert("Площадь окружности: " + circleArea);
+
+        // Задание 5
+        var distance = prompt("Введите расстояние между городами в км");
+        var time = prompt("За сколько часов вы хотите добраться?");
+        var speed = distance / time;
+        alert("Необходимая скорость: " + speed + " км/ч");
+
+        // Задание 6
+        const exchangeRate = 0.89; // Замените на текущий курс
+        var dollars = prompt("Введите сумму в долларах");
+        var euros = dollars * exchangeRate;
+        alert("Сумма в евро: " + euros);
+
+        // Задание 7
+        var flashDriveSize = prompt("Введите объем флешки в Гб");
+        var filesCount = Math.floor(flashDriveSize * 1024 / 820);
+        alert("Количество файлов на флешке: " + filesCount);
+
+        // Задание 8
+        var walletMoney = prompt("Введите сумму в кошельке");
+        var chocolatePrice = prompt("Введите цену одной шоколадки");
+        var chocolateCount = Math.floor(walletMoney / chocolatePrice);
+        var change = walletMoney % chocolatePrice;
+        alert("Можно купить " + chocolateCount + " шоколадок, сдача: " + change);
+
+        // Задание 9
+        var threeDigitNumber = prompt("Введите трехзначное число");
+        var reversedNumber = parseInt(threeDigitNumber.toString().split('').reverse().join(''));
+        alert("Число задом наперед: " + reversedNumber);
+
+        // Задание 10
+        var integerNumber = prompt("Введите целое число");
+        var isEven = integerNumber % 2 === 0;
+        alert("Число четное: " + isEven);
+    </script>
+</body>
+</html>
