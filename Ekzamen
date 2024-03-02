@@ -1,0 +1,239 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Weather Forecast</title>
+  <style>
+    body {
+      font-family: 'Arial', sans-serif;
+      background-color: #f4f4f4;
+      margin: 0;
+      padding: 0;
+    }
+
+    #app {
+      max-width: 600px;
+      margin: 20px auto;
+      padding: 20px;
+      background-color: #fff;
+      box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+      border-radius: 8px;
+    }
+
+    input {
+      padding: 8px;
+      font-size: 16px;
+    }
+
+    button {
+      padding: 10px;
+      font-size: 16px;
+      background-color: #4caf50;
+      color: #fff;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+    }
+
+    button:hover {
+      background-color: #45a049;
+    }
+
+    h2 {
+      color: #333;
+    }
+
+    #todayTab, #forecastTab {
+      margin-top: 20px;
+    }
+
+    .short-forecast {
+      display: flex;
+      justify-content: space-between;
+      flex-wrap: wrap;
+    }
+
+    .short-forecast div {
+      width: 48%;
+      padding: 10px;
+      margin: 5px;
+      background-color: #eee;
+      border-radius: 4px;
+      cursor: pointer;
+    }
+
+    .short-forecast div:hover {
+      background-color: #ddd;
+    }
+
+    #detailedForecast {
+      margin-top: 20px;
+      border: 1px solid #ddd;
+      padding: 15px;
+      border-radius: 8px;
+    }
+
+    #detailedForecast h3 {
+      color: #333;
+    }
+
+    #detailedForecast p {
+      margin: 5px 0;
+      color: #555;
+    }
+
+    #detailedForecast img {
+      margin-top: 10px;
+      max-width: 50px;
+    }
+  </style>
+</head>
+<body>
+  <div id="app">
+    <div>
+      <input type="text" id="cityInput" placeholder="Enter city name">
+      <button onclick="searchWeather()">Search</button>
+    </div>
+    <div>
+      <button onclick="switchTab('today')">Today</button>
+      <button onclick="switchTab('forecast')">5-day forecast</button>
+    </div>
+    <div id="todayTab" style="display: block;">
+      <h2>Today's Forecast</h2>
+      <div id="currentWeather"></div>
+      <div id="hourlyForecast"></div>
+      <div id="nearestCities"></div>
+    </div>
+    <div id="forecastTab" style="display: none;">
+      <h2>5-day Forecast</h2>
+      <div class="short-forecast" id="shortForecast"></div>
+      <div id="detailedForecast" style="display: none;">
+        <h3>Detailed Forecast</h3>
+        <div id="detailedContent"></div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const apiKey = "2a74c2951a81c8d4d20d9a502ece070e";
+    let currentCity = "";
+
+    async function getWeatherByLocation() {
+      try {
+        const position = await getCurrentPosition();
+        const { latitude, longitude } = position.coords;
+        const todayWeatherData = await fetchWeatherData(latitude, longitude);
+        showTodayWeather(todayWeatherData);
+      } catch (error) {
+        console.error("Error getting location or weather data:", error);
+      }
+    }
+
+    function getCurrentPosition() {
+      return new Promise((resolve, reject) => {
+        navigator.geolocation.getCurrentPosition(resolve, reject);
+      });
+    }
+
+    async function fetchWeatherData(latitude, longitude) {
+      const apiUrl = `https://api.openweathermap.org/data/2.5/weather?lat=${latitude}&lon=${longitude}&appid=${apiKey}&units=metric`;
+      const response = await fetch(apiUrl);
+      const data = await response.json();
+      return data;
+    }
+
+    function showTodayWeather(weatherData) {
+      const todayTab = document.getElementById("todayTab");
+      todayTab.innerHTML = `
+        <h2>${weatherData.name}</h2>
+        <p>Temperature: ${weatherData.main.temp}°C</p>
+        <p>Description: ${weatherData.weather[0].description}</p>
+        <!-- Додайте інші необхідні відомості -->
+      `;
+    }
+
+    async function showFiveDayForecast(cityName) {
+      const forecastTab = document.getElementById("forecastTab");
+      const forecastData = await fetchFiveDayForecast(cityName);
+
+      // Відображення короткого прогнозу на кожен з п'яти днів
+      const shortForecastHTML = forecastData.list.map(day => `
+        <div onclick="showDetailedForecast('${day.dt_txt}', ${JSON.stringify(day)})">
+          <p>${new Date(day.dt * 1000).toLocaleDateString('en-US', { weekday: 'short' })}</p>
+          <p>${new Date(day.dt * 1000).toLocaleDateString('en-US')}</p>
+          <p>${day.main.temp}°C</p>
+          <p>${day.weather[0].description}</p>
+        </div>
+      `).join("");
+
+      forecastTab.innerHTML = `
+        <h2>5-day forecast</h2>
+        <div class="short-forecast">${shortForecastHTML}</div>
+        <div id="detailedForecast" style="display: none;">
+          <!-- Деталізований прогноз буде тут -->
+        </div>
+      `;
+    }
+
+    async function fetchFiveDayForecast(cityName) {
+      const apiUrl = `https://api.openweathermap.org/data/2.5/forecast?q=${cityName}&appid=${apiKey}&units=metric`;
+      const response = await fetch(apiUrl);
+      const data = await response.json();
+      return data;
+    }
+
+    function showDetailedForecast(date, dayData) {
+      const detailedForecastDiv = document.getElementById("detailedForecast");
+      const detailedForecastHTML = `
+        <h3>${new Date(date).toLocaleDateString('en-US', { weekday: 'long' })}</h3>
+        <p>Temperature: ${dayData.main.temp}°C</p>
+        <p>Description: ${dayData.weather[0].description}</p>
+        <!-- Додайте інші необхідні відомості -->
+      `;
+
+      detailedForecastDiv.innerHTML = detailedForecastHTML;
+      detailedForecastDiv.style.display = "block";
+    }
+
+    function switchTab(tab) {
+      const todayTab = document.getElementById("todayTab");
+      const forecastTab = document.getElementById("forecastTab");
+
+      if (tab === "today") {
+        todayTab.style.display = "block";
+        forecastTab.style.display = "none";
+      } else if (tab === "forecast") {
+        todayTab.style.display = "none";
+        forecastTab.style.display = "block";
+        showFiveDayForecast(currentCity);
+      }
+    }
+
+    async function searchWeather() {
+      const cityInput = document.getElementById("cityInput");
+      const cityName = cityInput.value;
+
+      try {
+        const weatherData = await fetchWeatherDataByCity(cityName);
+        showTodayWeather(weatherData);
+      } catch (error) {
+        console.error("Error fetching weather data:", error);
+        alert("City not found. Please enter a valid city name.");
+      }
+    }
+
+    async function fetchWeatherDataByCity(cityName) {
+      const apiUrl = `https://api.openweathermap.org/data/2.5/weather?q=${cityName}&appid=${apiKey}&units=metric`;
+      const response = await fetch(apiUrl);
+      const data = await response.json();
+      currentCity = cityName; // Оновлення поточного міста
+      return data;
+    }
+
+    window.onload = function () {
+      getWeatherByLocation();
+    };
+  </script>
+</body>
+</html>
